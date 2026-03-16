@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Naka Classic Hybrid Timer</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --timer-body-color: #FDF6EC; /* 아이보리 본체 */
+            --dial-color: #FFFFFF; /* 흰색 다이얼 */
+            --green-sector-color: #1A4315; /* 짙은 녹색 섹터 */
+            --point-color: #F5B041; /* 노란색 버튼 */
+            --point-hover: #E67E22; /* 노란색 호버 (주황빛) */
+            --text-color: #37352f;
+            --sub-bg: #f3f2ef;
+            --font-family: 'Noto Sans KR', sans-serif;
+        }
+
+        body {
+            font-family: var(--font-family);
+            background-color: var(--timer-body-color);
+            margin: 0; padding: 10px;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            height: 100vh; overflow: hidden;
+        }
+
+        .timer-wrapper {
+            width: 100%; max-width: 340px;
+            display: flex; flex-direction: column; align-items: flex-start;
+            padding: 25px; box-sizing: border-box;
+            background: #fff; border-radius: 30px; 
+            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+        }
+        
+        .logo { 
+            color: var(--green-sector-color); font-weight: 700; font-size: 1.1rem; 
+            margin-bottom: 20px; text-transform: lowercase; font-family: sans-serif;
+        }
+
+        /* 타이머 아날로그 영역 */
+        .analog-display {
+            width: 100%; aspect-ratio: 1 / 1;
+            background-color: var(--dial-color);
+            border-radius: 50%;
+            border: 1px solid #eee;
+            position: relative;
+            overflow: hidden;
+            margin-bottom: 20px;
+        }
+        
+        .green-sector {
+            width: 100%; height: 100%;
+            border-radius: 50%;
+            position: absolute; top: 0; left: 0;
+            background: conic-gradient(var(--green-sector-color) 0deg, var(--dial-color) 0deg);
+            transition: background 0.3s ease-out;
+            transform: rotate(-90deg);
+        }
+
+        /* 눈금 레이어 */
+        .ticks { width: 100%; height: 100%; position: absolute; top: 0; left: 0; pointer-events: none; }
+        .tick { position: absolute; width: 2px; height: 10px; background-color: #ddd; transform-origin: top; }
+        .tick.large { height: 15px; background-color: #bbb; width: 2.5px; }
+
+        /* 중앙 아일랜드 (배경색 대비 해결) */
+        .center-island {
+            position: absolute; top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            width: 65%; height: 65%;
+            background: #fff;
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.02);
+            z-index: 10;
+        }
+
+        .digital-countdown {
+            font-size: 3.2rem; font-weight: 900; 
+            color: var(--text-color);
+            letter-spacing: -2px;
+            transition: color 0.5s;
+        }
+
+        /* 아주 느리고 은은한 브리딩 효과 (사용자 요청 반영: 6초 주기) */
+        .digital-countdown.running {
+            animation: breathe 6s infinite ease-in-out;
+            color: var(--green-sector-color);
+        }
+
+        @keyframes breathe {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.85; transform: scale(0.97); }
+        }
+
+        .motto-text {
+            width: 100%; text-align: center;
+            font-size: 0.8rem; color: #aaa; font-weight: 400;
+            margin-bottom: 20px; font-style: italic;
+        }
+
+        .controls-area { width: 100%; text-align: center; display: flex; flex-direction: column; gap: 15px; }
+        
+        .setting-area { display: flex; justify-content: center; align-items: center; gap: 8px; }
+        input[type="number"] {
+            width: 60px; padding: 10px; border: 1px solid #eee; 
+            border-radius: 12px; background: var(--sub-bg); color: var(--text-color);
+            font-family: var(--font-family); font-weight: 700; font-size: 1rem; outline: none; text-align: center;
+        }
+
+        /* 버튼 호버 효과: 움직임 없이 색상만 부드럽게 변경 */
+        .set-btn { 
+            background: var(--text-color); color: white; border: none; padding: 10px 18px; 
+            border-radius: 12px; cursor: pointer; font-weight: 600; font-size: 0.9rem;
+            transition: background 0.3s ease;
+        }
+        .set-btn:hover { background: #000; }
+
+        .main-btn-area { display: flex; justify-content: center; gap: 10px; }
+        .main-btn {
+            background: var(--point-color); color: white; border: none;
+            padding: 14px 40px; border-radius: 15px; cursor: pointer;
+            font-size: 1.1rem; font-weight: 800; 
+            transition: background 0.3s ease;
+        }
+        .main-btn:hover { background: var(--point-hover); }
+        .main-btn.running { background: #555; }
+        .main-btn.running:hover { background: #333; }
+
+        .reset-btn {
+            background: var(--sub-bg); border: none; color: var(--text-color);
+            padding: 14px 20px; border-radius: 15px; cursor: pointer; font-weight: 600;
+            transition: background 0.3s ease;
+        }
+        .reset-btn:hover { background: #e0deda; }
+    </style>
+</head>
+<body>
+
+<div class="timer-wrapper">
+    <div class="logo">naka</div>
+    <div class="analog-display">
+        <div class="green-sector" id="green-sector"></div>
+        <div class="ticks" id="ticks-container"></div>
+        <div class="center-island">
+            <div class="digital-countdown" id="digital-display">25:00</div>
+        </div>
+    </div>
+    
+    <div class="motto-text">Great things take time.</div>
+
+    <div class="controls-area">
+        <div class="setting-area">
+            <input type="number" id="minutes-input" min="1" max="60" value="25">
+            <span style="font-weight: 600; color: #888;">min</span>
+            <button class="set-btn" onclick="setTimeFromInput()">SET</button>
+        </div>
+        
+        <div class="main-btn-area">
+            <button class="main-btn" id="start-btn" onclick="toggleTimer()">START</button>
+            <button class="reset-btn" onclick="resetTimer()">RESET</button>
+        </div>
+    </div>
+</div>
+
+<audio id="alarm-sound" src="https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3" preload="auto"></audio>
+
+<script>
+    let maxTime = 60 * 60;
+    let currentTime = 25 * 60;
+    let timerId = null;
+    let isRunning = false;
+    let soundEnabled = false;
+
+    const greenSector = document.getElementById('green-sector');
+    const digitalDisplay = document.getElementById('digital-display');
+    const startBtn = document.getElementById('start-btn');
+    const minutesInput = document.getElementById('minutes-input');
+    const alarmSound = document.getElementById('alarm-sound');
+    const ticksContainer = document.getElementById('ticks-container');
+
+    // 눈금(Ticks) 생성 함수
+    function initTicks() {
+        for (let i = 0; i < 60; i += 5) { // 5분 단위로 눈금 표시
+            const angle = (i / 60) * 360;
+            const tick = document.createElement('div');
+            tick.className = 'tick large';
+            tick.style.left = '50%';
+            tick.style.top = '50%';
+            tick.style.transform = `translate(-50%, -50%) rotate(${angle}deg) translateY(-125px)`;
+            ticksContainer.appendChild(tick);
+        }
+    }
+
+    function updateDisplay() {
+        const angle = (currentTime / maxTime) * 360;
+        greenSector.style.background = `conic-gradient(var(--green-sector-color) ${angle}deg, var(--dial-color) ${angle}deg)`;
+        
+        const minutes = Math.floor(currentTime / 60);
+        const seconds = currentTime % 60;
+        digitalDisplay.innerText = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+    }
+
+    window.setTimeFromInput = function() {
+        let inputMin = parseInt(minutesInput.value) || 0;
+        if (inputMin > 60) inputMin = 60;
+        stopTimer();
+        currentTime = inputMin * 60;
+        updateDisplay();
+    }
+
+    window.toggleTimer = function() {
+        if (!soundEnabled) {
+            alarmSound.play().catch(() => {});
+            alarmSound.pause();
+            alarmSound.currentTime = 0;
+            soundEnabled = true;
+        }
+        if (isRunning) stopTimer();
+        else startTimer();
+    }
+
+    function startTimer() {
+        if (currentTime <= 0) return;
+        isRunning = true;
+        startBtn.innerText = "PAUSE";
+        startBtn.classList.add('running');
+        digitalDisplay.classList.add('running');
+        
+        timerId = setInterval(() => {
+            currentTime--;
+            updateDisplay();
+            if (currentTime <= 0) {
+                clearInterval(timerId);
+                alarmSound.play();
+                alert("시간이 종료되었습니다! 🍀");
+                resetTimer();
+            }
+        }, 1000);
+    }
+
+    function stopTimer() {
+        isRunning = false;
+        clearInterval(timerId);
+        startBtn.innerText = "START";
+        startBtn.classList.remove('running');
+        digitalDisplay.classList.remove('running');
+    }
+
+    function resetTimer() {
+        stopTimer();
+        setTimeFromInput();
+    }
+
+    initTicks();
+    updateDisplay();
+</script>
+</body>
+</html>
