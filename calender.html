@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>Notion Calendar Widget</title>
+    <style>
+        :root {
+            --bg-color: #ffffff;
+            --text-color: #37352f;
+            --today-bg: #eb5757;
+            --today-text: #ffffff;
+        }
+        /* 다크모드 대응 (선택사항) */
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg-color: #191919;
+                --text-color: #ffffff;
+            }
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        .calendar {
+            width: 280px;
+            padding: 20px;
+        }
+
+        .header {
+            display: flex;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 1.2rem;
+            margin-bottom: 20px;
+        }
+
+        .days-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 10px;
+            text-align: center;
+        }
+
+        .day-name {
+            font-size: 0.8rem;
+            font-weight: 600;
+            opacity: 0.5;
+        }
+
+        .date {
+            font-size: 0.9rem;
+            padding: 5px 0;
+            border-radius: 5px;
+        }
+
+        .today {
+            background-color: var(--today-bg);
+            color: var(--today-text);
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+<div class="calendar">
+    <div class="header" id="month-year"></div>
+    <div class="days-grid" id="days-container">
+        <div class="day-name">일</div><div class="day-name">월</div><div class="day-name">화</div>
+        <div class="day-name">수</div><div class="day-name">목</div><div class="day-name">금</div><div class="day-name">토</div>
+    </div>
+</div>
+
+<script>
+    const date = new Date();
+    const monthYear = document.getElementById('month-year');
+    const daysContainer = document.getElementById('days-container');
+
+    const viewYear = date.getFullYear();
+    const viewMonth = date.getMonth();
+
+    monthYear.innerText = `${viewYear}년 ${viewMonth + 1}월`;
+
+    const prevLast = new Date(viewYear, viewMonth, 0);
+    const thisLast = new Date(viewYear, viewMonth + 1, 0);
+
+    const PLDate = prevLast.getDate();
+    const PLDay = prevLast.getDay();
+    const TLDate = thisLast.getDate();
+
+    const prevDates = [];
+    const thisDates = [...Array(TLDate + 1).keys()].slice(1);
+    const nextDates = [];
+
+    if (PLDay !== 6) {
+        for (let i = 0; i < PLDay + 1; i++) {
+            prevDates.unshift("");
+        }
+    }
+
+    const totalDates = prevDates.concat(thisDates);
+    
+    totalDates.forEach((d, i) => {
+        const dateDiv = document.createElement('div');
+        dateDiv.classList.add('date');
+        if (d === date.getDate() && viewMonth === new Date().getMonth()) {
+            dateDiv.classList.add('today');
+        }
+        dateDiv.innerText = d;
+        daysContainer.appendChild(dateDiv);
+    });
+</script>
+</body>
+</html>
