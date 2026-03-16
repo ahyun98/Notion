@@ -3,15 +3,86 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dynamic Habit Tracker</title>
+    <title>Notion Habit Tracker</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
     <style>
+        @font-face {
+            font-family: 'OmuDaye';
+            src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2304-01@1.0/omyu_pretty.woff2') format('woff2');
+            font-weight: normal;
+            font-display: swap;
+        }
+        @font-face {
+            font-family: 'Presentation';
+            src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/2404@1.0/Freesentation-1Thin.woff2') format('woff2');
+            font-weight: 100;
+            font-display: swap;
+        }
+
+        @font-face {
+            font-family: 'Presentation';
+            src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/2404@1.0/Freesentation-2ExtraLight.woff2') format('woff2');
+            font-weight: 200;
+            font-display: swap;
+        }
+
+        @font-face {
+            font-family: 'Presentation';
+            src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/2404@1.0/Freesentation-3Light.woff2') format('woff2');
+            font-weight: 300;
+            font-display: swap;
+        }
+
+        @font-face {
+            font-family: 'Presentation';
+            src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/2404@1.0/Freesentation-4Regular.woff2') format('woff2');
+            font-weight: 400;
+            font-display: swap;
+        }
+
+        @font-face {
+            font-family: 'Presentation';
+            src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/2404@1.0/Freesentation-5Medium.woff2') format('woff2');
+            font-weight: 500;
+            font-display: swap;
+        }
+
+        @font-face {
+            font-family: 'Presentation';
+            src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/2404@1.0/Freesentation-6SemiBold.woff2') format('woff2');
+            font-weight: 600;
+            font-display: swap;
+        }
+
+        @font-face {
+            font-family: 'Presentation';
+            src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/2404@1.0/Freesentation-7Bold.woff2') format('woff2');
+            font-weight: 700;
+            font-display: swap;
+        }
+
+        @font-face {
+            font-family: 'Presentation';
+            src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/2404@1.0/Freesentation-8ExtraBold.woff2') format('woff2');
+            font-weight: 800;
+            font-display: swap;
+        }
+
+        @font-face {
+            font-family: 'Presentation';
+            src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/2404@1.0/Freesentation-9Black.woff2') format('woff2');
+            font-weight: 900;
+            font-display: swap;
+        }
         :root {
-            --point-color: #FF4D4D;
+            --point-color: #ff7a7a; /* 포인트 다홍색 */
+            --point-light: rgb(255 142 142 / 8%); /* 연한 핑크 배경 */
             --bg-color: #ffffff;
-            --text-color: #37352f;
+            --text-color: #1b1818;
             --border-color: #edece9;
-            --sub-bg: #f7f6f3;
+            --sub-bg: #ffffff;
+            --font-family: 'Presentation', 'Noto Sans KR', -apple-system, BlinkMacSystemFont, sans-serif;
         }
         @media (prefers-color-scheme: dark) {
             :root {
@@ -19,54 +90,80 @@
                 --text-color: #efefef;
                 --border-color: #2f2f2f;
                 --sub-bg: #222222;
+                --point-light: rgba(255, 77, 77, 0.15);
             }
         }
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+            font-family: var(--font-family);
             background-color: var(--bg-color);
             color: var(--text-color);
             margin: 0; padding: 20px;
             display: flex; flex-direction: column; align-items: center;
         }
-        .container { width: 100%; max-width: 650px; }
+        .container { width: 100%; max-width: 800px} /* 가로로 길게 사용 */
         
-        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-        .nav-btn { background: none; border: 1px solid var(--border-color); color: var(--text-color); padding: 5px 10px; cursor: pointer; border-radius: 5px; }
-        
-        /* 습관 추가 입력창 */
-        .add-habit-container { display: flex; gap: 10px; margin-bottom: 20px; }
-        #new-habit-input { 
-            flex: 1; padding: 8px 12px; border: 1px solid var(--border-color); 
-            border-radius: 5px; background: var(--sub-bg); color: var(--text-color);
+        /* 헤더 디자인 */
+        .header { display: flex; justify-content: center; align-items: center; gap: 20px; margin-bottom: 25px; }
+        .nav-btn { 
+            background: var(--sub-bg); border: none; color: var(--text-color); 
+            padding: 8px 12px; cursor: pointer; border-radius: 8px; font-size: 0.6rem;
+            transition: background 0.2s;
         }
-        .add-btn { background: var(--point-color); color: white; border: none; padding: 8px 15px; border-radius: 5px; cursor: pointer; font-weight: bold; }
+        .nav-btn:hover { background: var(--border-color); }
+        h2 { font-size: 1.4rem; font-weight: 700; margin: 0; color: var(--text-color); }
 
-        table { width: 100%; border-collapse: collapse; margin-bottom: 30px; font-size: 0.85rem; }
-        th, td { border: 1px solid var(--border-color); padding: 10px 5px; text-align: center; }
-        th { background: var(--sub-bg); }
+        /* 입력창 디자인 */
+        .add-habit-container { display: flex; gap: 10px; margin-bottom: 25px; justify-content: flex-start; }
+        #new-habit-input { 
+            width: 250px; padding: 10px 15px; border: 1px solid var(--border-color); 
+            border-radius: 6px; background: var(--sub-bg); color: var(--text-color);
+            font-family: var(--font-family); outline: none;
+        }
+        .add-btn { 
+            background: var(--point-color); color: white; border: none; padding: 10px 20px; 
+            border-radius: 10px; cursor: pointer; font-weight: 600; transition: transform 0.1s;
+        }
+        .add-btn:active { transform: scale(0.95); }
+
+        /* 테이블 디자인 */
+        .table-wrapper { border-radius: 6px; overflow: hidden; border: 1px solid var(--border-color); margin-bottom: 30px; }
+        table { width: 100%; border-collapse: collapse; font-size: 0.9rem; background: var(--bg-color); }
+        th, td { padding: 6px 8px; text-align: center; border-bottom: 1px solid var(--border-color); }
+        th { background: #ff7a7a; font-weight: 500; color: #ffffff; text-transform: uppercase; font-size: 0.85rem; padding: 12px 8px }
+        tr:last-child td { border-bottom: none; }
         
+        /* 습관 행 줄 맞춤 */
         .habit-name-cell { 
-            text-align: left; padding-left: 10px; min-width: 120px; 
-            display: flex; justify-content: space-between; align-items: center; 
+            text-align: left; padding-left: 15px; min-width: 150px;
+            display: flex; justify-content: space-between; align-items: center; height: 30px;
         }
         .del-btn { 
-            color: #ccc; cursor: pointer; font-size: 12px; margin-right: 5px;
-            transition: color 0.2s;
+            width: 22px; height: 22px; display: flex; align-items: center; justify-content: center;
+            border-radius: 3px; background: var(--sub-bg); color: #ccc; cursor: pointer;
+            font-size: 10px; transition: all 0.2s; border: none;
         }
-        .del-btn:hover { color: var(--point-color); }
+        .del-btn:hover { background: var(--point-light); color: var(--point-color); transform: rotate(90deg); }
 
+        /* 체크박스 디자인 */
         input[type="checkbox"] {
-            appearance: none; width: 18px; height: 18px; border: 2px solid var(--border-color);
-            border-radius: 4px; cursor: pointer; position: relative;
+            appearance: none; width: 18px; height: 18px; border: 1px solid var(--point-color);
+            border-radius: 20px; cursor: pointer; position: relative; transition: 0.2s;
         }
         input[type="checkbox"]:checked { background-color: var(--point-color); border-color: var(--point-color); }
-        input[type="checkbox"]:checked::after { content: '✔'; position: absolute; color: white; font-size: 12px; top: -1px; left: 2px; }
+        input[type="checkbox"]:checked::after { 
+            content: '✔'; position: absolute; color: white; font-size: 14px; top: 50%; left: 50%; transform: translate(-50%, -50%);
+        }
 
-        .progress-wrapper { width: 60px; background: var(--border-color); height: 8px; border-radius: 4px; overflow: hidden; margin: 0 auto; }
-        .progress-bar { height: 100%; background: var(--point-color); transition: width 0.3s; }
-        .percent-text { font-size: 0.7rem; display: block; margin-top: 4px; }
+        /* 프로그레스 바 */
+        .progress-wrapper { width: 70px; background: var(--sub-bg); height: 8px; border-radius: 10px; overflow: hidden; margin: 0 auto; }
+        .progress-bar { height: 100%; background: var(--point-color); transition: width 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        .percent-text { font-size: 0.75rem; font-weight: 600; display: block; margin-top: 5px; color: var(--point-color); }
 
-        .chart-container { margin-top: 20px; padding: 15px; background: var(--sub-bg); border-radius: 10px; }
+        /* 차트 영역 */
+        .chart-container { 
+            width: 100%; padding: 20px; background: #fffbfb; border-radius: 6px; border-color: var(--point-color);
+            box-sizing: border-box; margin-top: 10px;
+        }
     </style>
 </head>
 <body>
@@ -74,37 +171,37 @@
 <div class="container">
     <div class="header">
         <button class="nav-btn" onclick="changeWeek(-1)">◀</button>
-        <h2 id="week-title"></h2>
+        <h4 id="week-title">Habit Tracker (Loading...)</h2>
         <button class="nav-btn" onclick="changeWeek(1)">▶</button>
     </div>
 
     <div class="add-habit-container">
-        <input type="text" id="new-habit-input" placeholder="새로운 습관을 입력하세요 (예: 명상하기)">
+        <input type="text" id="new-habit-input" placeholder="어떤 습관을 만들까요?">
         <button class="add-btn" onclick="addHabit()">추가</button>
     </div>
 
-    <table id="habit-table">
-        <thead>
-            <tr>
-                <th>습관/계획</th>
-                <th>월</th><th>화</th><th>수</th><th>목</th><th>금</th><th>토</th><th>일</th>
-                <th>진행률</th>
-            </tr>
-        </thead>
-        <tbody id="habit-body"></tbody>
-    </table>
+    <div class="table-wrapper">
+        <table id="habit-table">
+            <thead>
+                <tr>
+                    <th>습관 / 계획</th>
+                    <th>월</th><th>화</th><th>수</th><th>목</th><th>금</th><th>토</th><th>일</th>
+                    <th>성공률</th>
+                </tr>
+            </thead>
+            <tbody id="habit-body"></tbody>
+        </table>
+    </div>
 
     <div class="chart-container">
-        <canvas id="habitChart"></canvas>
+        <canvas id="habitChart" height="180"></canvas>
     </div>
 </div>
 
 <script>
     let currentBaseDate = new Date();
     let chartInstance = null;
-
-    // 1. 습관 리스트 불러오기 (기본값 설정)
-    let myHabits = JSON.parse(localStorage.getItem('myHabitList')) || ["운동", "독서", "물 마시기"];
+    let myHabits = JSON.parse(localStorage.getItem('myHabitList')) || ["운동하기", "독서 10분"];
 
     function getMonday(d) {
         d = new Date(d);
@@ -114,7 +211,6 @@
 
     function getWeekKey(date) { return getMonday(date).toISOString().split('T')[0]; }
 
-    // --- 추가/삭제 기능 ---
     window.addHabit = function() {
         const input = document.getElementById('new-habit-input');
         const name = input.value.trim();
@@ -127,11 +223,10 @@
     }
 
     window.deleteHabit = function(name) {
-        if(confirm(`'${name}' 습관을 삭제할까요?`)) {
-            myHabits = myHabits.filter(h => h !== name);
-            localStorage.setItem('myHabitList', JSON.stringify(myHabits));
-            render();
-        }
+        // 노션 임베드 특성상 confirm 창은 방해가 되므로 즉시 삭제하도록 수정
+        myHabits = myHabits.filter(h => h !== name);
+        localStorage.setItem('myHabitList', JSON.stringify(myHabits));
+        render();
     }
 
     function render() {
@@ -139,7 +234,9 @@
         const monday = getMonday(currentBaseDate);
         const sunday = new Date(monday); sunday.setDate(monday.getDate() + 6);
 
-        document.getElementById('week-title').innerText = `${monday.getMonth()+1}/${monday.getDate()} ~ ${sunday.getMonth()+1}/${sunday.getDate()}`;
+        // 제목 형식 변경: Habit Tracker (M.D - M.D)
+        const dateRange = `${monday.getMonth()+1}.${monday.getDate()} - ${sunday.getMonth()+1}.${sunday.getDate()}`;
+        document.getElementById('week-title').innerText = `Habit Tracker (${dateRange})`;
 
         const storageData = JSON.parse(localStorage.getItem('habitTracker')) || {};
         const weekData = storageData[weekKey] || {};
@@ -153,10 +250,10 @@
             const habitData = weekData[habit] || [false, false, false, false, false, false, false];
             let successCount = 0;
 
-            let cells = `<td class="habit-name-cell">
+            let cells = `<td><div class="habit-name-cell">
                             <span>${habit}</span>
-                            <span class="del-btn" onclick="deleteHabit('${habit}')">✕</span>
-                         </td>`;
+                            <button class="del-btn" onclick="deleteHabit('${habit}')">✕</button>
+                         </div></td>`;
             
             habitData.forEach((checked, i) => {
                 if(checked) { successCount++; dailyCounts[i]++; }
@@ -196,6 +293,8 @@
         const ctx = document.getElementById('habitChart').getContext('2d');
         const isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
         const color = isDark ? '#efefef' : '#37352f';
+        const fontSettings = { family: "'OmuDaye'", size: 14 };
+
         if(chartInstance) chartInstance.destroy();
         chartInstance = new Chart(ctx, {
             type: 'line',
@@ -204,19 +303,32 @@
                 datasets: [{
                     label: '성공',
                     data: counts,
-                    borderColor: '#FF4D4D',
-                    backgroundColor: 'rgba(255, 77, 77, 0.1)',
-                    borderWidth: 3,
+                    borderColor: '#ff7a7a',
+                    backgroundColor: 'rgba(255, 77, 77, 0.2)',
+                    borderWidth: 2,
                     fill: true,
-                    tension: 0.4
+                    tension: 0.4,
+                    pointRadius: 3,
+                    pointBackgroundColor: '#fff',
+                    pointBorderColor: '#ff7a7a',
+                    pointBorderWidth: 1
                 }]
             },
             options: {
                 responsive: true,
+                maintainAspectRatio: false,
                 plugins: { legend: { display: false } },
                 scales: {
-                    y: { beginAtZero: true, max: Math.max(5, myHabits.length), ticks: { stepSize: 1, color: color } },
-                    x: { ticks: { color: color } }
+                    y: { 
+                        beginAtZero: true, 
+                        max: Math.max(3, myHabits.length), 
+                        ticks: { stepSize: 1, color: color, font: fontSettings },
+                        grid: { color: isDark ? '#2f2f2f' : 'rgb(255 142 142 / 40%)', drawBorder: false }
+                    },
+                    x: { 
+                        ticks: { color: color, font: fontSettings },
+                        grid: { display: false }
+                    }
                 }
             }
         });
